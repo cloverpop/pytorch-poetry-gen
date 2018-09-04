@@ -5,6 +5,14 @@ import torch.nn.functional as F
 # import nninit
 
 
+
+#
+# 0:  No GPU cuda support
+# 1:  Use CPU instead of GPU
+#
+CUDA_GPU = 0
+
+
 class PoetryModel(nn.Module):
     def __init__(self, vocab_size, embedding_dim, hidden_dim):
         super(PoetryModel, self).__init__()
@@ -26,5 +34,12 @@ class PoetryModel(nn.Module):
         return output, hidden
 
     def initHidden(self, length=1):
-        return (Variable(torch.zeros(length, 1, self.hidden_dim).cuda()),
+        if CUDA_GPU:
+            return (Variable(torch.zeros(length, 1, self.hidden_dim).cuda()),
                 Variable(torch.zeros(length, 1, self.hidden_dim)).cuda())
+        else:
+            return (Variable(torch.zeros(length, 1, self.hidden_dim)),
+                Variable(torch.zeros(length, 1, self.hidden_dim)))
+        pass
+
+
