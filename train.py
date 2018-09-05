@@ -22,8 +22,8 @@ CUDA_GPU = 0
 #
 # Parse the raw data from Chinese-poetry json files
 #
-#data = dataHandler.parseRawData()  # All if author=None
-data = dataHandler.parseRawData(author="李白".decode('utf-8'),constrain=5)  # All if author=None
+data = dataHandler.parseRawData()  # All if author=None
+#data = dataHandler.parseRawData(author="李白".decode('utf-8'),constrain=5)  # All if author=None
 # random.shuffle(data)
 for s in data:
     #print s
@@ -45,24 +45,66 @@ for sentence in data:
 	#print word
         if word not in word_to_ix:
             word_to_ix[word] = len(word_to_ix)
-    #exit(1)
+
+# --------------------------------------
+#
+#  If the unicode beginning is ranged from 0x8Exx,filter it out
+#
+to_remove_dict = {}
+for key,value in word_to_ix.iteritems():
+	try:
+		if isinstance(key, unicode):
+			#print (u"{k}   ->  {v}"  ).format(k=key, v=value),
+			pass
+		else:
+			print(u"find a non-unicode value [%s]"%(key))
+	except UnicodeError:
+		to_remove_dict[key] = word_to_ix[key]
+	except TypeError:
+		print ("Detect a type error!")
+		pass
+	pass
+
+print ("Original raw dictionary length=[%d]"%(len(word_to_ix)))
+print ("Non unicode dictionary length=[%d]"%(len(to_remove_dict)))
+
+for key in to_remove_dict.keys():
+	del word_to_ix[key]
+
+print ("Filter out non-unicode dict length=[%d]"%(len(word_to_ix)))
+
+# --------------------------------------
+
+
 word_to_ix['<EOP>'] = len(word_to_ix)
 word_to_ix['<START>'] = len(word_to_ix)
 
 VOCAB_SIZE = len(word_to_ix)
 
+
+#
+# Post-process 'data' object
+#
+for i in range(len(data)):
+    if data[i] in to_remove_dict.keys():
+        print "Skip the abnormal key"
+    else:
+        data[i] = toList(data[i])
+        #print data[i]
+        data[i].append("<EOP>")
+# save the word dic for sample method
+p.dump(word_to_ix, file('wordDic', 'w'))
+
+
+
 print "VOCAB_SIZE:", VOCAB_SIZE
 print "data_size", len(data)
 
 
-
 # --------------------------------------
-# debug
+#  debug
 print word_to_ix['<EOP>']
 print word_to_ix['<START>']
-
-
-
 
 a=[]
 a.append("校")
@@ -73,23 +115,27 @@ print u"校".encode('utf-8')
 print word_to_ix[u"久"]
 print word_to_ix[u"知"]
 
-print json.dumps(word_to_ix, ensure_ascii=False)
+#print word_to_ix
 
-
-#exit(0)
+if u'\u653b' in word_to_ix:
+	print u'\u653b'
 # --------------------------------------
 
-#
-#
-#
 
 
-for i in range(len(data)):
-    data[i] = toList(data[i])
-    #print data[i]
-    data[i].append("<EOP>")
-# save the word dic for sample method
-p.dump(word_to_ix, file('wordDic', 'w'))
+#
+# Output the unicode value
+#
+#print word_to_ix
+
+
+
+#
+# Output the Chinese character
+#
+
+#print json.dumps(word_to_ix, encoding="utf-8", ensure_ascii=False)
+#print json.dumps(word_to_ix,  ensure_ascii=False)
 
 
 #exit(0)
