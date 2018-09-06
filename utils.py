@@ -29,9 +29,30 @@ def toList(sen):
 def makeForOneCase(s, one_hot_var_target):
     tmpIn = []
     tmpOut = []
+    count = 0
     for i in range(1, len(s)):
         w = s[i]
         w_b = s[i - 1]
-        tmpIn.append(one_hot_var_target[w_b])
-        tmpOut.append(one_hot_var_target[w])
-    return torch.cat(tmpIn), torch.cat(tmpOut)
+
+        flag_normal = 1
+        try:
+            tmpIn.append(one_hot_var_target[w_b])
+        except KeyError:
+            count += 1
+            #print("Ignore KeyError")
+            flag_normal = 0
+            pass
+
+        # if it is normal character without exception, tmpOut appends
+        if flag_normal:
+            tmpOut.append(one_hot_var_target[w])
+
+    if count > 0:
+        print("[makeForOneCase] -> Ignore KeyError [%d] times"%(count))
+        #print(u"[makeForOneCase] s=[%s]"%(s) )
+
+    # Sanity check because torch.cat only accepts non-empty list
+    if len(tmpIn) == 0 or len(tmpOut) == 0:
+        return tmpIn, tmpOut
+    else:
+        return torch.cat(tmpIn), torch.cat(tmpOut)
