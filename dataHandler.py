@@ -1,10 +1,16 @@
 #coding:utf-8
+
+#
+# Parse the json files of poems
+#
+
 import sys
 import os
 import json
 import re
 
 from sys import exit
+import string
 
 def parseRawData(author = None, constrain = None):
     rst = []
@@ -48,6 +54,13 @@ def parseRawData(author = None, constrain = None):
                     if flag:
                         break
             if flag:
+                continue
+
+            #I found Tang poems whose titles contains "琴曲歌辭" are duplicated
+            #So that we have to filter it out
+            my_title = poetry.get("title")
+            if my_title.rfind(u"琴曲歌辭") != -1:
+                print("Poem title=[%s]"%(my_title))
                 continue
 
             for sentence in poetry.get("paragraphs"):
