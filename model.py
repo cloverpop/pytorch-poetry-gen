@@ -22,7 +22,7 @@ class PoetryModel(nn.Module):
 
         self.linear1 = nn.Linear(self.hidden_dim, vocab_size)
         # self.dropout = nn.Dropout(0.2)
-        self.softmax = nn.LogSoftmax()
+        self.softmax = nn.LogSoftmax(dim=1)
 
     def forward(self, input, hidden):
         length = input.size()[0]
@@ -38,6 +38,7 @@ class PoetryModel(nn.Module):
             return (Variable(torch.zeros(length, 1, self.hidden_dim).cuda()),
                 Variable(torch.zeros(length, 1, self.hidden_dim)).cuda())
         else:
+            #print("length=[%d] hidden_dim=[%d]"%(length, self.hidden_dim))
             return (Variable(torch.zeros(length, 1, self.hidden_dim)),
                 Variable(torch.zeros(length, 1, self.hidden_dim)))
         pass
