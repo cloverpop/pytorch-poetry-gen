@@ -19,7 +19,7 @@ max_length = 100
 rFile = file('wordDic', 'r')
 word_to_ix = p.load(rFile)
 
-print("len(word__to_ix)=[%d]"%(len(word_to_ix)))
+print("len(word_to_ix)=[%d]"%(len(word_to_ix)))
 
 def invert_dict(d):
     return dict((v, k) for k, v in d.iteritems())
@@ -31,6 +31,7 @@ ix_to_word = invert_dict(word_to_ix)
 # Sample from a category and starting letter
 def sample(startWord='<START>'):
     input = make_one_hot_vec_target(startWord, word_to_ix)
+
     hidden = model.initHidden()
     output_name = "";
     if (startWord != "<START>"):
@@ -40,8 +41,10 @@ def sample(startWord='<START>'):
             output, hidden = model(input.cuda(), hidden)
         else:
             output, hidden = model(input, hidden)
+
         topv, topi = output.data.topk(1)
-        topi = topi[0][0]
+        topi = int(topi[0][0])
+
         w = ix_to_word[topi]
         if w == "<EOP>":
             break
